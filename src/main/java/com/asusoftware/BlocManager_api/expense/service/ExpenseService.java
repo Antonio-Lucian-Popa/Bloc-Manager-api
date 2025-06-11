@@ -81,4 +81,12 @@ public class ExpenseService {
                 .orElseThrow(() -> new RuntimeException("Cheltuiala nu a fost găsită"));
         return mapper.map(expense, ExpenseDto.class);
     }
+
+    public void deleteExpense(UUID expenseId) {
+        if (!expenseRepository.existsById(expenseId)) {
+            throw new RuntimeException("Cheltuiala nu a fost găsită.");
+        }
+        expenseRepository.deleteById(expenseId);
+    }
+
 }
