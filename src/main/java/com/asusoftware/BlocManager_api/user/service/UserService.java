@@ -30,7 +30,7 @@ public class UserService {
      * Înregistrează un nou utilizator în Keycloak și în baza de date locală.
      */
     @Transactional
-    public User registerUser(UserRegisterDto dto) {
+    public UserDto registerUser(UserRegisterDto dto) {
         // Creează userul în Keycloak și obține ID-ul acestuia
         String keycloakId = keycloakService.createKeycloakUser(dto);
 
@@ -55,7 +55,7 @@ public class UserService {
                 .build();
         userRoleRepository.save(role);
 
-        return user;
+        return mapper.map(user, UserDto.class);
     }
 
     public LoginResponseDto login(LoginDto dto) {
