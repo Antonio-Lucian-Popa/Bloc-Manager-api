@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     List<Expense> findByBlockId(UUID blockId);
     List<Expense> findByBlockIdAndMonth(UUID blockId, LocalDate month);
+    List<Expense> findAllByBlockId(UUID blockId);
 }
