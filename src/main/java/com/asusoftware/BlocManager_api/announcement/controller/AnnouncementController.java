@@ -30,6 +30,7 @@ public class AnnouncementController {
     /**
      * Returnează toate anunțurile pentru un bloc.
      */
+    // TODO: De pus pageable
     @GetMapping("/block/{blockId}")
     public List<AnnouncementDto> getAnnouncementsForBlock(@PathVariable UUID blockId,
                                                           @RequestAttribute Jwt principal) {
