@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
     List<Apartment> findByBlockId(UUID blockId);
+    List<Apartment> findAllByBlockId(UUID blockId);
+
 }
