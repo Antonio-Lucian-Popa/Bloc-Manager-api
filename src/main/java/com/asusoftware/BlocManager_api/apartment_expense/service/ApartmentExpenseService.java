@@ -8,6 +8,7 @@ import com.asusoftware.BlocManager_api.apartment_expense.model.dto.CreateApartme
 import com.asusoftware.BlocManager_api.apartment_expense.repository.ApartmentExpenseRepository;
 import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
+import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,6 +27,7 @@ public class ApartmentExpenseService {
     private final ApartmentRepository apartmentRepository;
     private final UserRoleRepository userRoleRepository;
     private final BlocRepository blockRepository;
+    private final UserService userService;
     private final ModelMapper mapper;
 
     /**
@@ -86,6 +88,40 @@ public class ApartmentExpenseService {
 
         return apartmentExpenseRepository.findAllByApartmentId(apartmentId).stream()
                 .map(e -> mapper.map(e, ApartmentExpenseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returnează toate cheltuielile pentru un anumit apartament
+     */
+    public List<ApartmentExpenseDto> getByApartment(UUID apartmentId, Jwt principal) {
+        UUID currentUserId = userService.getUserByKeycloakId(principal);
+
+        Apartment apartment = apartmentRepository.findById(apartmentId)
+                .orElseThrow(() -> new RuntimeException("Apartament inexistent."));
+
+        UUID blockId = apartment.getBlockId();
+        UUID associationId = apartmentRepository.getAssociationIdByApartmentId(apartmentId);
+
+        boolean hasAccess =
+                userRoleRepository.existsByUserIdAndBlockId(currentUserId, blockId) ||
+                        userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
+
+        if (!hasAccess) {
+            throw new RuntimeException("Nu ai acces la acest apartament.");
+        }
+
+        return apartmentExpenseRepository.findAllByApartmentId(apartmentId).stream()
+                .map(entity -> mapper.map(entity, ApartmentExpenseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returnează toate apartamentele care au primit o cheltuială specifică
+     */
+    public List<ApartmentExpenseDto> getByExpense(UUID expenseId) {
+        return apartmentExpenseRepository.findAllByExpenseId(expenseId).stream()
+                .map(entity -> mapper.map(entity, ApartmentExpenseDto.class))
                 .collect(Collectors.toList());
     }
 
