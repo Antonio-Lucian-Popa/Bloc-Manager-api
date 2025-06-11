@@ -33,7 +33,6 @@ public class RepairRequestService {
         }
 
         RepairRequest request = RepairRequest.builder()
-                .id(UUID.randomUUID())
                 .blockId(blockId)
                 .apartmentId(apartmentId)
                 .submittedBy(currentUserId)
