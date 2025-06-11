@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: BLOCMANAGER/master.yaml
+      relativeToChangelogFile: true
