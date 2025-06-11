@@ -40,7 +40,7 @@ keycloak:
   # auth-server-url: http://antonio-dev.go.ro:8081/keycloack-app/realms/gym-management-realm/protocol/openid-connect/auth
   auth-server-url: http://antonio-dev.go.ro:8081/keycloak-app/
   credentials:
-    secret: PXMyEtADl5nCpj7efKiVjk81ImIJgo9y
+    secret: 3QMoOAoGysubdKpWSLSaFWiMjMaQ9ijI
   admin:
     username: admin
     password: admin
