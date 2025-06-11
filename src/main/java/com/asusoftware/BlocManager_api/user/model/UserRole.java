@@ -25,8 +25,9 @@ public class UserRole {
     @Column(name = "block_id")
     private UUID blockId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private UsersRole role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

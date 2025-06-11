@@ -1,5 +1,6 @@
 package com.asusoftware.BlocManager_api.config;
 
+import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import com.asusoftware.BlocManager_api.user.model.dto.LoginDto;
 import com.asusoftware.BlocManager_api.user.model.dto.LoginResponseDto;
 import com.asusoftware.BlocManager_api.user.model.dto.UserRegisterDto;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -53,6 +55,14 @@ public class KeycloakService {
             throw new RuntimeException("User deja existent în Keycloak.");
         }
 
+        UsersRole role;
+        try {
+            role = userDTO.getRole();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Rol invalid: " + userDTO.getRole());
+        }
+
+
         UserRepresentation user = new UserRepresentation();
         user.setUsername(userDTO.getEmail());
         user.setFirstName(userDTO.getFirstName());
@@ -60,7 +70,7 @@ public class KeycloakService {
         user.setEmail(userDTO.getEmail());
         user.setEnabled(true);
         user.setEmailVerified(true);
-        user.setRealmRoles(Collections.singletonList(userDTO.getRole().name()));
+        user.setRealmRoles(Collections.singletonList(role.name()));
 
         CredentialRepresentation password = new CredentialRepresentation();
         password.setType(CredentialRepresentation.PASSWORD);
