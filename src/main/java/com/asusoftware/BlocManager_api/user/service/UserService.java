@@ -3,6 +3,8 @@ package com.asusoftware.BlocManager_api.user.service;
 import com.asusoftware.BlocManager_api.config.KeycloakService;
 import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UserRole;
+import com.asusoftware.BlocManager_api.user.model.dto.LoginDto;
+import com.asusoftware.BlocManager_api.user.model.dto.LoginResponseDto;
 import com.asusoftware.BlocManager_api.user.model.dto.UserRegisterDto;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
@@ -48,6 +50,14 @@ public class UserService {
         userRoleRepository.save(role);
 
         return user;
+    }
+
+    public LoginResponseDto login(LoginDto dto) {
+        return keycloakService.loginUser(dto);
+    }
+
+    public LoginResponseDto refresh(String refreshToken) {
+        return keycloakService.refreshToken(refreshToken);
     }
 
 }
