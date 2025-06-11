@@ -12,4 +12,7 @@ public interface ApartmentExpenseRepository extends JpaRepository<ApartmentExpen
     List<ApartmentExpense> findByApartmentId(UUID apartmentId);
     List<ApartmentExpense> findByExpenseId(UUID expenseId);
     List<ApartmentExpense> findAllByApartmentId(UUID apartmentId);
+
+    List<ApartmentExpense> findAllByExpenseId(UUID expenseId);
+    List<ApartmentExpense> findAllByApartmentIdAndExpenseId(UUID apartmentId, UUID expenseId);
 }
