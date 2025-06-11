@@ -12,4 +12,6 @@ public interface RepairRequestRepository extends JpaRepository<RepairRequest, UU
     List<RepairRequest> findByBlockId(UUID blockId);
     List<RepairRequest> findByApartmentId(UUID apartmentId);
     List<RepairRequest> findBySubmittedBy(UUID userId);
+    List<RepairRequest> findAllByBlockId(UUID blockId);
+
 }
