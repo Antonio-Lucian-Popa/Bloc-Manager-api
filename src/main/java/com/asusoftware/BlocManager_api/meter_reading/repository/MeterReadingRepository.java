@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface MeterReadingRepository extends JpaRepository<MeterReading, UUID> {
     List<MeterReading> findByApartmentId(UUID apartmentId);
+    List<MeterReading> findAllByApartmentId(UUID apartmentId);
+
 }
