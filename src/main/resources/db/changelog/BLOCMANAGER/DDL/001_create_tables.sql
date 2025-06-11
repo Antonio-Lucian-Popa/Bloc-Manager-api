@@ -65,8 +65,9 @@ CREATE TABLE user_roles (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Utilizatorul
     association_id UUID REFERENCES associations(id) ON DELETE CASCADE, -- Asociația (opțional)
     block_id UUID REFERENCES blocks(id) ON DELETE CASCADE,             -- Blocul (opțional)
-    role VARCHAR(50) NOT NULL,                                    -- Rol: ADMIN_ASSOCIATION, BLOCK_ADMIN, LOCATAR etc.
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN_ASSOCIATION', 'BLOCK_ADMIN', 'LOCATAR')), -- Rol: ADMIN_ASSOCIATION, BLOCK_ADMIN, LOCATAR etc.
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, role, association_id, block_id)
 );
 
 -- =============================
@@ -144,7 +145,7 @@ CREATE TABLE repair_requests (
     block_id UUID NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
     submitted_by UUID REFERENCES users(id),                 -- Utilizatorul care a trimis
     description TEXT NOT NULL,                              -- Ce problemă există
-    status VARCHAR(50) DEFAULT 'open',                      -- Status: open / in_progress / closed
+    status VARCHAR(50) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'closed')),  -- Status: open / in_progress / closed
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
