@@ -34,9 +34,12 @@ public class UserService {
         // Creează userul în Keycloak și obține ID-ul acestuia
         String keycloakId = keycloakService.createKeycloakUser(dto);
 
+        if (dto.getRole() == null) {
+            throw new IllegalArgumentException("Rolul utilizatorului este obligatoriu.");
+        }
+
         // Creează local userul
         User user = User.builder()
-                .id(UUID.randomUUID())
                 .keycloakId(UUID.fromString(keycloakId))
                 .email(dto.getEmail())
                 .firstName(dto.getFirstName())
@@ -47,7 +50,6 @@ public class UserService {
 
         // Creează local rolul (ex: ADMIN_ASSOCIATION) – pentru început fără asociere la bloc/asociație
         UserRole role = UserRole.builder()
-                .id(UUID.randomUUID())
                 .userId(user.getId())
                 .role(dto.getRole())
                 .build();
