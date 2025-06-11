@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface ApartmentExpenseRepository extends JpaRepository<ApartmentExpense, UUID> {
     List<ApartmentExpense> findByApartmentId(UUID apartmentId);
     List<ApartmentExpense> findByExpenseId(UUID expenseId);
+    List<ApartmentExpense> findAllByApartmentId(UUID apartmentId);
 }

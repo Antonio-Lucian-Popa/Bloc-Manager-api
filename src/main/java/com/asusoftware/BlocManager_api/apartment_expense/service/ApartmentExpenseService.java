@@ -6,6 +6,7 @@ import com.asusoftware.BlocManager_api.apartment_expense.model.ApartmentExpense;
 import com.asusoftware.BlocManager_api.apartment_expense.model.dto.ApartmentExpenseDto;
 import com.asusoftware.BlocManager_api.apartment_expense.model.dto.CreateApartmentExpenseDto;
 import com.asusoftware.BlocManager_api.apartment_expense.repository.ApartmentExpenseRepository;
+import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,7 @@ public class ApartmentExpenseService {
     private final ApartmentExpenseRepository apartmentExpenseRepository;
     private final ApartmentRepository apartmentRepository;
     private final UserRoleRepository userRoleRepository;
+    private final BlocRepository blockRepository;
     private final ModelMapper mapper;
 
     /**
@@ -37,8 +39,13 @@ public class ApartmentExpenseService {
                 .orElseThrow(() -> new RuntimeException("Apartament inexistent"));
 
         // Verificare dacă userul are acces la blocul apartamentului
-        boolean hasAccess = userRoleRepository.existsByUserIdAndBlockId(currentUserId, apartment.getBlockId())
-                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, apartment.getAssociationId());
+        UUID blockId = apartment.getBlockId();
+        UUID associationId = blockRepository.findById(blockId)
+                .orElseThrow(() -> new RuntimeException("Blocul nu a fost găsit"))
+                .getAssociationId();
+
+        boolean hasAccess = userRoleRepository.existsByUserIdAndBlockId(currentUserId, blockId)
+                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
 
         if (!hasAccess) {
             throw new RuntimeException("Nu ai permisiunea de a adăuga cheltuieli pentru acest apartament.");
@@ -65,8 +72,13 @@ public class ApartmentExpenseService {
         Apartment apartment = apartmentRepository.findById(apartmentId)
                 .orElseThrow(() -> new RuntimeException("Apartament inexistent"));
 
+        UUID blockId = apartment.getBlockId();
+        UUID associationId = blockRepository.findById(blockId)
+                .orElseThrow(() -> new RuntimeException("Blocul nu a fost găsit"))
+                .getAssociationId();
+
         boolean hasAccess = userRoleRepository.existsByUserIdAndBlockId(currentUserId, apartment.getBlockId())
-                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, apartment.getAssociationId());
+                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
 
         if (!hasAccess) {
             throw new RuntimeException("Nu ai acces la acest apartament.");
@@ -90,8 +102,13 @@ public class ApartmentExpenseService {
         Apartment apartment = apartmentRepository.findById(expense.getApartmentId())
                 .orElseThrow(() -> new RuntimeException("Apartament inexistent"));
 
+        UUID blockId = apartment.getBlockId();
+        UUID associationId = blockRepository.findById(blockId)
+                .orElseThrow(() -> new RuntimeException("Blocul nu a fost găsit"))
+                .getAssociationId();
+
         boolean hasAccess = userRoleRepository.existsByUserIdAndBlockId(currentUserId, apartment.getBlockId())
-                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, apartment.getAssociationId());
+                || userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
 
         if (!hasAccess) {
             throw new RuntimeException("Nu ai dreptul să ștergi această cheltuială.");
