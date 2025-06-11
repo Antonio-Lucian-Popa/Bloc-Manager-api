@@ -22,6 +22,9 @@ public class Association {
 
     private String address;
 
+    @Column(name = "created_by", nullable = false)
+    private UUID createdBy;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

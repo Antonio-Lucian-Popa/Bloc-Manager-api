@@ -1,0 +1,82 @@
+package com.asusoftware.BlocManager_api.association.service;
+
+import com.asusoftware.BlocManager_api.association.model.Association;
+import com.asusoftware.BlocManager_api.association.model.dto.AssociationDto;
+import com.asusoftware.BlocManager_api.association.model.dto.CreateAssociationDto;
+import com.asusoftware.BlocManager_api.association.repository.AssociationRepository;
+import com.asusoftware.BlocManager_api.user.model.User;
+import com.asusoftware.BlocManager_api.user.model.UsersRole;
+import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
+import com.asusoftware.BlocManager_api.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class AssociationService {
+
+    private final AssociationRepository associationRepository;
+    private final UserService userService;
+    private final UserRoleRepository userRoleRepository;
+    private final ModelMapper mapper;
+
+    /**
+     * Creează o nouă asociație (doar pentru utilizator cu rol ADMIN_ASSOCIATION).
+     */
+    @Transactional
+    public AssociationDto createAssociation(CreateAssociationDto dto, Jwt principal) {
+        User currentUser = userService.getCurrentUserEntity(principal);
+
+        // Poți valida dacă userul are deja o asociație creată (dacă vrei să limitezi)
+        boolean hasRole = userRoleRepository.existsByUserIdAndRole(currentUser.getId(), UsersRole.ADMIN_ASSOCIATION);
+        if (!hasRole) {
+            throw new RuntimeException("Nu ai permisiunea să creezi o asociație.");
+        }
+
+        Association association = Association.builder()
+                .name(dto.getName())
+                .address(dto.getAddress())
+                .cif(dto.getCif())
+                .createdBy(currentUser.getId())
+                .build();
+
+        associationRepository.save(association);
+        return mapper.map(association, AssociationDto.class);
+    }
+
+    /**
+     * Returnează toate asociațiile (ex: pentru super-admin) – poți filtra ulterior.
+     */
+    public List<AssociationDto> getAllAssociations() {
+        return associationRepository.findAll().stream()
+                .map(association -> mapper.map(association, AssociationDto.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returnează toate asociațiile create de utilizatorul curent.
+     */
+    public List<AssociationDto> getMyAssociations(Jwt principal) {
+        UUID currentUserId = userService.getUserByKeycloakId(principal);
+        return associationRepository.findAllByCreatedBy(currentUserId).stream()
+                .map(association -> mapper.map(association, AssociationDto.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Găsește o asociație după ID.
+     */
+    public AssociationDto getById(UUID id) {
+        Association association = associationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asociația nu a fost găsită"));
+        return mapper.map(association, AssociationDto.class);
+    }
+}
