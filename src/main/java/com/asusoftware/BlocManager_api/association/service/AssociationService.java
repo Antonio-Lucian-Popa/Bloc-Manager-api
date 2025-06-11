@@ -5,11 +5,14 @@ import com.asusoftware.BlocManager_api.association.model.dto.AssociationDto;
 import com.asusoftware.BlocManager_api.association.model.dto.CreateAssociationDto;
 import com.asusoftware.BlocManager_api.association.repository.AssociationRepository;
 import com.asusoftware.BlocManager_api.user.model.User;
+import com.asusoftware.BlocManager_api.user.model.UserRole;
 import com.asusoftware.BlocManager_api.user.model.UsersRole;
+import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ public class AssociationService {
     private final AssociationRepository associationRepository;
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+    private final UserRepository userRepository;
     private final ModelMapper mapper;
 
     /**
@@ -51,6 +55,39 @@ public class AssociationService {
         associationRepository.save(association);
         return mapper.map(association, AssociationDto.class);
     }
+
+    @Transactional
+    public void inviteUserToAssociation(UUID associationId, UUID userId, UsersRole role, Jwt principal) {
+        // 1. Verifică dacă cel care invită este admin în asociație
+        User currentUser = userService.getCurrentUserEntity(principal);
+        boolean isAdmin = userRoleRepository.existsByUserIdAndAssociationIdAndRole(
+                currentUser.getId(), associationId, UsersRole.ADMIN_ASSOCIATION
+        );
+        if (!isAdmin) {
+            throw new AccessDeniedException("Nu ai permisiunea să inviți utilizatori în această asociație.");
+        }
+
+        // 2. Verifică dacă utilizatorul există
+        User invitedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilizatorul invitat nu există."));
+
+        // 3. Verifică dacă deja are rolul respectiv
+        boolean alreadyExists = userRoleRepository.existsByUserIdAndAssociationIdAndRole(
+                userId, associationId, role
+        );
+        if (alreadyExists) {
+            throw new RuntimeException("Utilizatorul are deja acest rol în asociație.");
+        }
+
+        // 4. Creează rolul
+        UserRole userRole = UserRole.builder()
+                .userId(userId)
+                .associationId(associationId)
+                .role(role)
+                .build();
+        userRoleRepository.save(userRole);
+    }
+
 
     /**
      * Returnează toate asociațiile (ex: pentru super-admin) – poți filtra ulterior.
