@@ -23,4 +23,13 @@ public class ApartmentExpense {
 
     @Column(name = "allocated_amount")
     private Double allocatedAmount;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "month")
+    private Integer month;
+
+    @Column(name = "year")
+    private Integer year;
 }

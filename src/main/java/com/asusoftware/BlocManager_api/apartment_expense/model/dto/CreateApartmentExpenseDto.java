@@ -11,4 +11,7 @@ public class CreateApartmentExpenseDto {
     private UUID apartmentId;
     private UUID expenseId;
     private Double allocatedAmount;
+    private String description;
+    private Integer month;
+    private Integer year;
 }
