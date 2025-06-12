@@ -38,7 +38,6 @@ public class ApartmentService {
         }
 
         Apartment apartment = Apartment.builder()
-                .id(UUID.randomUUID())
                 .blockId(blockId)
                 .number(dto.getNumber())
                 .ownerName(dto.getOwnerName())
