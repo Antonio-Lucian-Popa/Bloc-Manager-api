@@ -101,7 +101,7 @@ public class ApartmentExpenseService {
                 .orElseThrow(() -> new RuntimeException("Apartament inexistent."));
 
         UUID blockId = apartment.getBlockId();
-        UUID associationId = apartmentRepository.getAssociationIdByApartmentId(apartmentId);
+        UUID associationId = apartmentRepository.getAssociationIdByBlockId(blockId);
 
         boolean hasAccess =
                 userRoleRepository.existsByUserIdAndBlockId(currentUserId, blockId) ||

@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface BlocRepository extends JpaRepository<Bloc, UUID> {
     List<Bloc> findByAssociationId(UUID associationId);
     List<Bloc> findAllByAssociationId(UUID associationId);
-    @Query("SELECT b.association.id FROM Block b WHERE b.id = :blockId")
+    @Query("SELECT b.associationId FROM Bloc b WHERE b.id = :blockId")
     UUID findAssociationIdByBlockId(@Param("blockId") UUID blockId);
+
 }

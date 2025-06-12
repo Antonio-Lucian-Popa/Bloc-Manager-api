@@ -53,6 +53,7 @@ CREATE TABLE users (
     first_name VARCHAR(255) NOT NULL,                       -- Nume
     last_name VARCHAR(255) NOT NULL,                   -- Prenume
     phone VARCHAR(20),                                     -- Telefon (opțional)
+    stripe_account_id VARCHAR(255),                     -- ID cont Stripe (opțional, pentru plăți)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

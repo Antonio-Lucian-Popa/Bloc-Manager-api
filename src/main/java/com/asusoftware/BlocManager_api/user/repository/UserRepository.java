@@ -16,5 +16,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByKeycloakId(UUID keycloakId);
     Optional<User> findByStripeAccountId(String stripeAccountId);
 
-    List<User> findByRole(UsersRole role, Pageable pageable);
+//    List<User> findByRole(UsersRole role, Pageable pageable);
 }
