@@ -6,6 +6,7 @@ import com.asusoftware.BlocManager_api.association.model.dto.InviteUserDto;
 import com.asusoftware.BlocManager_api.association.service.AssociationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class AssociationController {
      * Creează o nouă asociație (doar pentru utilizatori cu rol ADMIN_ASSOCIATION).
      */
     @PostMapping
-    public AssociationDto createAssociation(@Valid @RequestBody CreateAssociationDto dto, @RequestAttribute Jwt principal) {
+    public AssociationDto createAssociation(@Valid @RequestBody CreateAssociationDto dto, @AuthenticationPrincipal Jwt principal) {
         return associationService.createAssociation(dto, principal);
     }
 
@@ -31,7 +32,7 @@ public class AssociationController {
      * Listează toate asociațiile create de userul curent.
      */
     @GetMapping("/my")
-    public List<AssociationDto> getMyAssociations(@RequestAttribute Jwt principal) {
+    public List<AssociationDto> getMyAssociations(@AuthenticationPrincipal Jwt principal) {
         return associationService.getMyAssociations(principal);
     }
 
