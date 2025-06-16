@@ -14,6 +14,8 @@ CREATE TABLE associations (
     name VARCHAR(255) NOT NULL,                             -- Numele asociației
     cif VARCHAR(20),                                        -- Cod fiscal (opțional)
     address TEXT,                                           -- Adresa generală
+    phone_number VARCHAR(20),
+    email VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP          -- Data creării
 );
 

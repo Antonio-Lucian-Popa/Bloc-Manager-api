@@ -8,11 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
-    List<UserRole> findByUserId(UUID userId);
+    Optional<UserRole> findByUserId(UUID userId);
+   // List<UserRole> findByUserId(UUID userId);
     List<UserRole> findByAssociationId(UUID associationId);
     List<UserRole> findByBlockId(UUID blockId);
     boolean existsByUserIdAndRole(UUID userId, UsersRole role);

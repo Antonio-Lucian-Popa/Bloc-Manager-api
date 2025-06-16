@@ -3,10 +3,7 @@ package com.asusoftware.BlocManager_api.user.service;
 import com.asusoftware.BlocManager_api.config.KeycloakService;
 import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UserRole;
-import com.asusoftware.BlocManager_api.user.model.dto.LoginDto;
-import com.asusoftware.BlocManager_api.user.model.dto.LoginResponseDto;
-import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
-import com.asusoftware.BlocManager_api.user.model.dto.UserRegisterDto;
+import com.asusoftware.BlocManager_api.user.model.dto.*;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +67,13 @@ public class UserService {
         UUID keycloakId = UUID.fromString(principal.getSubject());
         User user = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return mapper.map(user, UserDto.class);
+
+        UserDto userDto = mapper.map(user, UserDto.class);
+        // Obține rolul avansat
+        userRoleRepository.findByUserId(user.getId()).ifPresent(role -> {
+            userDto.setRole(mapper.map(role, UserRoleDto.class));
+        });
+        return userDto;
     }
 
     public User getCurrentUserEntity(Jwt principal) {

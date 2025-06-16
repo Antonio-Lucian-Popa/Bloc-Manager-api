@@ -22,6 +22,10 @@ public class Association {
 
     private String address;
 
+    private String phoneNumber;
+
+    private String email;
+
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 

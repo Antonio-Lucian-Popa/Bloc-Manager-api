@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,6 +40,8 @@ public class AssociationService {
     public AssociationDto createAssociation(CreateAssociationDto dto, Jwt principal) {
         User currentUser = userService.getCurrentUserEntity(principal);
 
+        UserRole userRole = userRoleRepository.findByUserId(currentUser.getId()).orElseThrow(NotFoundException::new);
+
         // Poți valida dacă userul are deja o asociație creată (dacă vrei să limitezi)
         boolean hasRole = userRoleRepository.existsByUserIdAndRole(currentUser.getId(), UsersRole.ADMIN_ASSOCIATION);
         if (!hasRole) {
@@ -53,6 +56,11 @@ public class AssociationService {
                 .build();
 
         associationRepository.save(association);
+
+        userRole.setAssociationId(association.getId());
+
+        userRoleRepository.save(userRole);
+
         return mapper.map(association, AssociationDto.class);
     }
 
