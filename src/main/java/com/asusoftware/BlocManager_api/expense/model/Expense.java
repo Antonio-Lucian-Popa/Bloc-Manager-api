@@ -20,12 +20,14 @@ public class Expense {
     @Column(name = "block_id", nullable = false)
     private UUID blockId;
 
-    private String name;
-
     private String description;
 
     @Column(name = "total_amount")
     private Double totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    private ExpenseCategory category;
 
     private LocalDate month;
 

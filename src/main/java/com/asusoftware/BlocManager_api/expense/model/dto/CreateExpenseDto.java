@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CreateExpenseDto {
     private UUID blockId;
-    private String name;
+    //private String name;
     private String description;
     private Double totalAmount;
     private LocalDate month;
