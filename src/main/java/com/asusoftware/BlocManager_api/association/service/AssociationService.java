@@ -65,7 +65,7 @@ public class AssociationService {
     }
 
     @Transactional
-    public void inviteUserToAssociation(UUID associationId, UUID userId, UsersRole role, Jwt principal) {
+    public void inviteUserToAssociation(UUID associationId, String email, UsersRole role, UUID blocId, Jwt principal) {
         // 1. Verifică dacă cel care invită este admin în asociație
         User currentUser = userService.getCurrentUserEntity(principal);
         boolean isAdmin = userRoleRepository.existsByUserIdAndAssociationIdAndRole(
@@ -76,12 +76,12 @@ public class AssociationService {
         }
 
         // 2. Verifică dacă utilizatorul există
-        User invitedUser = userRepository.findById(userId)
+        User invitedUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilizatorul invitat nu există."));
 
         // 3. Verifică dacă deja are rolul respectiv
         boolean alreadyExists = userRoleRepository.existsByUserIdAndAssociationIdAndRole(
-                userId, associationId, role
+                invitedUser.getId(), associationId, role
         );
         if (alreadyExists) {
             throw new RuntimeException("Utilizatorul are deja acest rol în asociație.");
@@ -89,7 +89,7 @@ public class AssociationService {
 
         // 4. Creează rolul
         UserRole userRole = UserRole.builder()
-                .userId(userId)
+                .userId(invitedUser.getId())
                 .associationId(associationId)
                 .role(role)
                 .build();

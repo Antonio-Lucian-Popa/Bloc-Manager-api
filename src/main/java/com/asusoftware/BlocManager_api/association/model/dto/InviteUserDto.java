@@ -9,8 +9,10 @@ import java.util.UUID;
 @Data
 public class InviteUserDto {
     @NotNull
-    private UUID userId;
+    private String email;
 
     @NotNull
     private UsersRole role;
+
+    private UUID blocId; // Blocul în care se face invitația, poate fi null dacă nu este specificat
 }

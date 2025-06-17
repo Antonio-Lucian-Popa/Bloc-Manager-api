@@ -3,6 +3,7 @@ package com.asusoftware.BlocManager_api.user.service;
 import com.asusoftware.BlocManager_api.config.KeycloakService;
 import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UserRole;
+import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import com.asusoftware.BlocManager_api.user.model.dto.*;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
@@ -45,13 +46,14 @@ public class UserService {
                 .build();
         userRepository.save(user);
 
-        // Creează local rolul (ex: ADMIN_ASSOCIATION) – pentru început fără asociere la bloc/asociație
-        UserRole role = UserRole.builder()
-                .userId(user.getId())
-                .role(dto.getRole())
-                .build();
-        userRoleRepository.save(role);
-
+        if(dto.getRole() != UsersRole.LOCATAR) {
+            // Creează local rolul (ex: ADMIN_ASSOCIATION) – pentru început fără asociere la bloc/asociație
+            UserRole role = UserRole.builder()
+                    .userId(user.getId())
+                    .role(dto.getRole())
+                    .build();
+            userRoleRepository.save(role);
+        }
         return mapper.map(user, UserDto.class);
     }
 

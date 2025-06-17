@@ -45,6 +45,6 @@ public class AssociationController {
             @Valid @RequestBody InviteUserDto dto,
             @AuthenticationPrincipal Jwt principal
     ) {
-        associationService.inviteUserToAssociation(associationId, dto.getUserId(), dto.getRole(), principal);
+        associationService.inviteUserToAssociation(associationId, dto.getEmail(), dto.getRole(), dto.getBlocId(), principal);
     }
 }
