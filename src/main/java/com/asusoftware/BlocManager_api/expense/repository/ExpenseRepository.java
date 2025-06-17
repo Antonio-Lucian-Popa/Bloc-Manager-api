@@ -15,7 +15,7 @@ import java.util.UUID;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     List<Expense> findByBlockId(UUID blockId);
-    List<Expense> findByBlockIdAndMonth(UUID blockId, LocalDate month);
+    List<Expense> findByBlockIdAndDueDate(UUID blockId, LocalDate dueDate);
     List<Expense> findAllByBlockId(UUID blockId);
 
     @Query("SELECT e FROM Expense e WHERE e.blockId IN :blockIds")
@@ -24,7 +24,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     @Query("""
     SELECT e FROM Expense e
     WHERE e.blockId IN :blockIds
-    AND (:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')))
+    AND (:search IS NULL OR LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%')))
 """)
     Page<Expense> findByBlockIdsWithSearch(
             @Param("blockIds") List<UUID> blockIds,

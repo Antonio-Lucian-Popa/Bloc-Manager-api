@@ -5,6 +5,7 @@ import com.asusoftware.BlocManager_api.apartment.repository.ApartmentRepository;
 import com.asusoftware.BlocManager_api.apartment_expense.model.ApartmentExpense;
 import com.asusoftware.BlocManager_api.apartment_expense.repository.ApartmentExpenseRepository;
 import com.asusoftware.BlocManager_api.bloc.model.Bloc;
+import com.asusoftware.BlocManager_api.bloc.model.dto.BlocDto;
 import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.expense.model.Expense;
 import com.asusoftware.BlocManager_api.expense.model.ExpenseStatus;
@@ -103,7 +104,13 @@ public class ExpenseService {
         }
 
         Page<Expense> page = expenseRepository.findByBlockIdsWithSearch(blockIds, search, pageable);
-        return page.map(expense -> mapper.map(expense, ExpenseDto.class));
+        return page.map(expense -> {
+          ExpenseDto expenseDto = mapper.map(expense, ExpenseDto.class);
+          Bloc bloc = blockRepository.findById(expense.getBlockId())
+                .orElseThrow(() -> new RuntimeException("Blocul nu a fost găsit"));
+          expenseDto.setBloc(mapper.map(bloc, BlocDto.class));
+          return expenseDto;
+        });
     }
 
 
