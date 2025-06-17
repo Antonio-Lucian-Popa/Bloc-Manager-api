@@ -54,8 +54,9 @@ public class BlocService {
     /**
      * Returnează blocurile dintr-o asociație, dacă userul are acces.
      */
-    public List<Bloc> getBlocksByAssociation(UUID associationId, UUID currentUserId) {
-        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
+    public List<Bloc> getBlocksByAssociation(UUID associationId, Jwt currentUserId) {
+        User currentUser = userService.getCurrentUserEntity(currentUserId);
+        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUser.getId(), associationId);
         if (!hasAccess) {
             throw new RuntimeException("Nu aveți acces la această asociație.");
         }

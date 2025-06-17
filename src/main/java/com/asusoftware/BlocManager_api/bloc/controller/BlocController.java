@@ -32,7 +32,6 @@ public class BlocController {
             @PathVariable UUID associationId,
             @AuthenticationPrincipal Jwt principal
     ) {
-        UUID currentUserId = UUID.fromString(principal.getSubject());
-        return blocService.getBlocksByAssociation(associationId, currentUserId);
+        return blocService.getBlocksByAssociation(associationId, principal);
     }
 }
