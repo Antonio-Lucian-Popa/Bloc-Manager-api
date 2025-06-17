@@ -4,8 +4,10 @@ import com.asusoftware.BlocManager_api.association.model.dto.AssociationDto;
 import com.asusoftware.BlocManager_api.association.model.dto.CreateAssociationDto;
 import com.asusoftware.BlocManager_api.association.model.dto.InviteUserDto;
 import com.asusoftware.BlocManager_api.association.service.AssociationService;
+import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +48,14 @@ public class AssociationController {
             @AuthenticationPrincipal Jwt principal
     ) {
         associationService.inviteUserToAssociation(associationId, dto.getEmail(), dto.getRole(), dto.getBlocId(), principal);
+    }
+
+
+    @GetMapping("/users/{associationId}")
+    public ResponseEntity<List<UserDto>> getUsersByAssociation(
+            @PathVariable UUID associationId,
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        return ResponseEntity.ok(associationService.getUsersByAssociation(associationId, principal));
     }
 }

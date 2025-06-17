@@ -7,6 +7,7 @@ import com.asusoftware.BlocManager_api.association.repository.AssociationReposit
 import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UserRole;
 import com.asusoftware.BlocManager_api.user.model.UsersRole;
+import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import com.asusoftware.BlocManager_api.user.service.UserService;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.NotFoundException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -124,4 +126,32 @@ public class AssociationService {
                 .orElseThrow(() -> new RuntimeException("Asociația nu a fost găsită"));
         return mapper.map(association, AssociationDto.class);
     }
+
+    public List<UserDto> getUsersByAssociation(UUID associationId, Jwt principal) {
+        // Obținem userul curent
+        User currentUser = userService.getCurrentUserEntity(principal);
+
+        // Verificăm dacă are acces la asociație
+        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUser.getId(), associationId);
+        if (!hasAccess) {
+            throw new AccessDeniedException("Nu ai acces la această asociație.");
+        }
+
+        // Căutăm toate rolurile din acea asociație
+        List<UserRole> userRoles = userRoleRepository.findByAssociationId(associationId);
+
+        // Extragem utilizatorii unici pe baza userId
+        Set<UUID> userIds = userRoles.stream()
+                .map(UserRole::getUserId)
+                .collect(Collectors.toSet());
+
+        // Căutăm toți userii pe baza ID-urilor
+        List<User> users = userRepository.findAllById(userIds);
+
+        // Convertim în DTO-uri
+        return users.stream()
+                .map(user -> mapper.map(user, UserDto.class))
+                .collect(Collectors.toList());
+    }
+
 }
