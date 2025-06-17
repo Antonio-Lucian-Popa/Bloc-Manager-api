@@ -2,6 +2,8 @@ package com.asusoftware.BlocManager_api.payment.service;
 
 import com.asusoftware.BlocManager_api.apartment.model.Apartment;
 import com.asusoftware.BlocManager_api.apartment.repository.ApartmentRepository;
+import com.asusoftware.BlocManager_api.bloc.model.Bloc;
+import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.payment.model.Payment;
 import com.asusoftware.BlocManager_api.payment.model.dto.CreatePaymentDto;
 import com.asusoftware.BlocManager_api.payment.model.dto.PaymentDto;
@@ -9,12 +11,16 @@ import com.asusoftware.BlocManager_api.payment.repository.PaymentRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +30,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ApartmentRepository apartmentRepository;
     private final UserRoleRepository userRoleRepository;
+    private final BlocRepository blocRepository;
     private final ModelMapper mapper;
 
     /**
@@ -73,6 +80,45 @@ public class PaymentService {
                 .map(p -> mapper.map(p, PaymentDto.class))
                 .collect(Collectors.toList());
     }
+
+    public Page<PaymentDto> getPaymentsForAssociation(UUID associationId, Jwt principal, int page, int size, String search) {
+        UUID currentUserId = UUID.fromString(principal.getSubject());
+
+        // 1. Verificare acces (opțional, doar dacă vrei să restricționezi)
+        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
+        if (!hasAccess) {
+            throw new RuntimeException("Nu aveți acces la această asociație.");
+        }
+
+        // 2. Găsește toate blocurile din asociație
+        List<Bloc> blocks = blocRepository.findAllByAssociationId(associationId);
+        List<UUID> blockIds = blocks.stream().map(Bloc::getId).toList();
+
+        if (blockIds.isEmpty()) return Page.empty();
+
+        // 3. Găsește toate apartamentele din blocuri
+        List<Apartment> apartments = apartmentRepository.findAllByBlockIdIn(blockIds);
+        Map<UUID, Apartment> apartmentMap = apartments.stream()
+                .collect(Collectors.toMap(Apartment::getId, Function.identity()));
+
+        List<UUID> apartmentIds = new ArrayList<>(apartmentMap.keySet());
+        if (apartmentIds.isEmpty()) return Page.empty();
+
+        // 4. Paginare și search
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Payment> paymentsPage;
+
+        if (search != null && !search.trim().isEmpty()) {
+            paymentsPage = paymentRepository.searchByApartmentIdIn(apartmentIds, search.toLowerCase(), pageable);
+        } else {
+            paymentsPage = paymentRepository.findAllByApartmentIdIn(apartmentIds, pageable);
+        }
+
+
+        // 5. Mapare la DTO
+        return paymentsPage.map(p -> mapper.map(p, PaymentDto.class));
+    }
+
 
     public PaymentDto getById(UUID id) {
         Payment payment = paymentRepository.findById(id)

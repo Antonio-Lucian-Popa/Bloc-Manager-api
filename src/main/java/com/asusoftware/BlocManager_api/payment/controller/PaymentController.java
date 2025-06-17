@@ -5,6 +5,7 @@ import com.asusoftware.BlocManager_api.payment.model.dto.PaymentDto;
 import com.asusoftware.BlocManager_api.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +31,19 @@ public class PaymentController {
     public ResponseEntity<List<PaymentDto>> getForApartment(@PathVariable UUID apartmentId, @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(paymentService.getPaymentsForApartment(apartmentId, jwt));
     }
+
+    @GetMapping("/association/{associationId}")
+    public ResponseEntity<Page<PaymentDto>> getForAssociation(
+            @PathVariable UUID associationId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search
+    ) {
+        return ResponseEntity.ok(paymentService.getPaymentsForAssociation(associationId, jwt, page, size, search));
+    }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDto> getById(@PathVariable UUID id) {
