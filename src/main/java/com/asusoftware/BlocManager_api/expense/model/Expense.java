@@ -23,13 +23,13 @@ public class Expense {
     private String description;
 
     @Column(name = "total_amount")
-    private Double totalAmount;
+    private Double amount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private ExpenseCategory category;
 
-    private LocalDate month;
+    private LocalDate dueDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
