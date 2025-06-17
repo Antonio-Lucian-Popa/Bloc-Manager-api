@@ -40,9 +40,9 @@ public class PaymentController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String search
     ) {
-        return ResponseEntity.ok(paymentService.getPaymentsForAssociation(associationId, jwt, page, size, search));
+        Page<PaymentDto> payments = paymentService.getPaymentsForAssociation(associationId, jwt, page, size, search);
+        return ResponseEntity.ok(payments);
     }
-
 
 
     @GetMapping("/{id}")

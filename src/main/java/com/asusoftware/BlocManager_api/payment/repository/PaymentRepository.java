@@ -19,7 +19,18 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     Page<Payment> findAllByApartmentIdIn(List<UUID> apartmentIds, Pageable pageable);
 
-    @Query("SELECT p FROM Payment p WHERE p.apartmentId IN :apartmentIds AND LOWER(p.description) LIKE %:search%")
-    Page<Payment> searchByApartmentIdIn(@Param("apartmentIds") List<UUID> apartmentIds, @Param("search") String search, Pageable pageable);
+    @Query("""
+    SELECT p FROM Payment p
+    WHERE p.apartmentId IN :apartmentIds
+      AND (
+          LOWER(CAST(p.note AS string)) LIKE LOWER(CONCAT('%', :search, '%'))
+          OR CAST(p.amount AS string) LIKE CONCAT('%', :search, '%')
+      )
+""")
+    Page<Payment> searchByApartmentIdIn(
+            @Param("apartmentIds") List<UUID> apartmentIds,
+            @Param("search") String search,
+            Pageable pageable
+    );
 
 }

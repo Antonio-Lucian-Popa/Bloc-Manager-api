@@ -9,6 +9,7 @@ import com.asusoftware.BlocManager_api.payment.model.dto.CreatePaymentDto;
 import com.asusoftware.BlocManager_api.payment.model.dto.PaymentDto;
 import com.asusoftware.BlocManager_api.payment.repository.PaymentRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
+import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ public class PaymentService {
     private final ApartmentRepository apartmentRepository;
     private final UserRoleRepository userRoleRepository;
     private final BlocRepository blocRepository;
+    private final UserService userService;
     private final ModelMapper mapper;
 
     /**
@@ -82,41 +84,32 @@ public class PaymentService {
     }
 
     public Page<PaymentDto> getPaymentsForAssociation(UUID associationId, Jwt principal, int page, int size, String search) {
-        UUID currentUserId = UUID.fromString(principal.getSubject());
 
-        // 1. Verificare acces (opțional, doar dacă vrei să restricționezi)
-        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUserId, associationId);
+        UUID userId = userService.getUserByKeycloakId(principal);
+
+        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(userId, associationId);
         if (!hasAccess) {
             throw new RuntimeException("Nu aveți acces la această asociație.");
         }
 
-        // 2. Găsește toate blocurile din asociație
         List<Bloc> blocks = blocRepository.findAllByAssociationId(associationId);
         List<UUID> blockIds = blocks.stream().map(Bloc::getId).toList();
-
         if (blockIds.isEmpty()) return Page.empty();
 
-        // 3. Găsește toate apartamentele din blocuri
         List<Apartment> apartments = apartmentRepository.findAllByBlockIdIn(blockIds);
-        Map<UUID, Apartment> apartmentMap = apartments.stream()
-                .collect(Collectors.toMap(Apartment::getId, Function.identity()));
-
-        List<UUID> apartmentIds = new ArrayList<>(apartmentMap.keySet());
+        List<UUID> apartmentIds = apartments.stream().map(Apartment::getId).toList();
         if (apartmentIds.isEmpty()) return Page.empty();
 
-        // 4. Paginare și search
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Payment> paymentsPage;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        if (search != null && !search.trim().isEmpty()) {
-            paymentsPage = paymentRepository.searchByApartmentIdIn(apartmentIds, search.toLowerCase(), pageable);
+        Page<Payment> payments;
+        if (!search.isBlank()) {
+            payments = paymentRepository.searchByApartmentIdIn(apartmentIds, search.toLowerCase(), pageable);
         } else {
-            paymentsPage = paymentRepository.findAllByApartmentIdIn(apartmentIds, pageable);
+            payments = paymentRepository.findAllByApartmentIdIn(apartmentIds, pageable);
         }
 
-
-        // 5. Mapare la DTO
-        return paymentsPage.map(p -> mapper.map(p, PaymentDto.class));
+        return payments.map(payment -> mapper.map(payment, PaymentDto.class));
     }
 
 
