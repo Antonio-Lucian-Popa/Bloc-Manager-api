@@ -1,9 +1,11 @@
 package com.asusoftware.BlocManager_api.bloc.controller;
 
 import com.asusoftware.BlocManager_api.bloc.model.Bloc;
+import com.asusoftware.BlocManager_api.bloc.model.dto.BlocDto;
 import com.asusoftware.BlocManager_api.bloc.model.dto.CreateBlocDto;
 import com.asusoftware.BlocManager_api.bloc.service.BlocService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +30,14 @@ public class BlocController {
     }
 
     @GetMapping("/association/{associationId}")
-    public List<Bloc> getBlocksByAssociation(
+    public Page<BlocDto> getBlocksByAssociation(
             @PathVariable UUID associationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
             @AuthenticationPrincipal Jwt principal
     ) {
-        return blocService.getBlocksByAssociation(associationId, principal);
+        return blocService.getBlocksByAssociation(associationId, page, size, search, principal);
     }
+
 }
