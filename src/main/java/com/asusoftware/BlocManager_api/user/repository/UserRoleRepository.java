@@ -27,4 +27,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
     // Sau dacă vrei doar userIds:
     @Query("SELECT ur.userId FROM UserRole ur WHERE ur.role = :role")
     List<UUID> findUserIdsByRole(@Param("role") UsersRole role);
+
+    List<UserRole> findByAssociationIdAndUserIdIn(UUID associationId, List<UUID> userIds);
+
 }

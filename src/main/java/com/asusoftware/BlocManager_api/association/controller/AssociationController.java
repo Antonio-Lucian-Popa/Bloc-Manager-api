@@ -7,6 +7,8 @@ import com.asusoftware.BlocManager_api.association.service.AssociationService;
 import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -52,10 +54,13 @@ public class AssociationController {
 
 
     @GetMapping("/users/{associationId}")
-    public ResponseEntity<List<UserDto>> getUsersByAssociation(
+    public ResponseEntity<Page<UserDto>> getUsersByAssociation(
             @PathVariable UUID associationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
             @AuthenticationPrincipal Jwt principal
     ) {
-        return ResponseEntity.ok(associationService.getUsersByAssociation(associationId, principal));
+        return ResponseEntity.ok(associationService.getUsersByAssociation(associationId, page, size, search, principal));
     }
 }

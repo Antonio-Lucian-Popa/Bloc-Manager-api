@@ -14,6 +14,9 @@ import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -21,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import javax.ws.rs.NotFoundException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -129,40 +129,47 @@ public class AssociationService {
         return mapper.map(association, AssociationDto.class);
     }
 
-    public List<UserDto> getUsersByAssociation(UUID associationId, Jwt principal) {
-        // Obținem userul curent
+    public Page<UserDto> getUsersByAssociation(UUID associationId, int page, int size, String search, Jwt principal) {
+        // 1. Verificăm dacă userul are acces la asociație
         User currentUser = userService.getCurrentUserEntity(principal);
-
-        // Verificăm dacă are acces la asociație
         boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUser.getId(), associationId);
         if (!hasAccess) {
             throw new AccessDeniedException("Nu ai acces la această asociație.");
         }
 
-        // Căutăm toate rolurile din acea asociație
-        List<UserRole> userRoles = userRoleRepository.findByAssociationId(associationId);
+        Pageable pageable = PageRequest.of(page, size);
 
-        // Grupăm rolurile după userId
-        Map<UUID, List<UserRole>> rolesByUserId = userRoles.stream()
-                .collect(Collectors.groupingBy(UserRole::getUserId));
+        // 2. Obținem toți userii cu roluri în această asociație (filtrați direct dacă e căutare)
+        Page<User> usersPage;
 
-        // Căutăm toți userii pe baza ID-urilor
-        List<User> users = userRepository.findAllById(rolesByUserId.keySet());
+        if (search != null && !search.isBlank()) {
+            usersPage = userRepository.findDistinctByIdInAndSearch(
+                    associationId, search.toLowerCase(), pageable
+            );
+        } else {
+            usersPage = userRepository.findDistinctByIdIn(
+                    associationId, pageable
+            );
+        }
 
-        // Convertim în DTO-uri
-        return users.stream().map(user -> {
-            List<UserRole> roles = rolesByUserId.getOrDefault(user.getId(), List.of());
+        // 3. Preluăm toate rolurile în acea asociație pentru userii returnați
+        List<UUID> userIds = usersPage.stream().map(User::getId).toList();
+        List<UserRole> roles = userRoleRepository.findByAssociationIdAndUserIdIn(associationId, userIds);
 
-            // Alegem primul rol (sau putem implementa o regulă de prioritate)
-            UserRoleDto selectedRoleDto = roles.stream()
-                    .findFirst()
-                    .map(role -> mapper.map(role, UserRoleDto.class))
-                    .orElse(null);
+        Map<UUID, UserRole> roleMap = roles.stream()
+                .collect(Collectors.toMap(UserRole::getUserId, role -> role, (a, b) -> a));
 
+        // 4. Mapăm în DTO
+        return usersPage.map(user -> {
             UserDto dto = mapper.map(user, UserDto.class);
-            dto.setRole(selectedRoleDto);
+            UserRole role = roleMap.get(user.getId());
+            if (role != null) {
+                dto.setRole(mapper.map(role, UserRoleDto.class));
+            }
             return dto;
-        }).collect(Collectors.toList());
+        });
     }
+
+
 
 }
