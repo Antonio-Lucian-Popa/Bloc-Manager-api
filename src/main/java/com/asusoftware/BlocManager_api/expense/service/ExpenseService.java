@@ -7,6 +7,7 @@ import com.asusoftware.BlocManager_api.apartment_expense.repository.ApartmentExp
 import com.asusoftware.BlocManager_api.bloc.model.Bloc;
 import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.expense.model.Expense;
+import com.asusoftware.BlocManager_api.expense.model.ExpenseStatus;
 import com.asusoftware.BlocManager_api.expense.model.dto.CreateExpenseDto;
 import com.asusoftware.BlocManager_api.expense.model.dto.ExpenseDto;
 import com.asusoftware.BlocManager_api.expense.repository.ExpenseRepository;
@@ -41,10 +42,11 @@ public class ExpenseService {
         // Salvează cheltuiala principală
         Expense expense = Expense.builder()
                 .blockId(dto.getBlockId())
-                .name(dto.getName())
                 .description(dto.getDescription())
-                .month(dto.getMonth() != null ? dto.getMonth() : LocalDate.now().withDayOfMonth(1))
-                .totalAmount(dto.getTotalAmount())
+                .dueDate(dto.getDueDate() != null ? dto.getDueDate() : LocalDate.now().withDayOfMonth(1))
+                .amount(dto.getAmount())
+                .category(dto.getCategory())
+                .status(dto.getStatus() != null ? dto.getStatus() : ExpenseStatus.PENDING)
                 .createdAt(LocalDate.now().atStartOfDay())
                 .build();
 
@@ -54,7 +56,7 @@ public class ExpenseService {
         List<Apartment> apartments = apartmentRepository.findAllByBlockId(dto.getBlockId());
 
         // Calculează suma per apartament (distribuire egală sau pe bază de suprafață – opțional)
-        double amountPerApartment = dto.getTotalAmount().doubleValue() / apartments.size();
+        double amountPerApartment = dto.getAmount() / apartments.size();
 
         // Salvează înregistrările ApartmentExpense
         for (Apartment apartment : apartments) {
@@ -62,6 +64,8 @@ public class ExpenseService {
                     .apartmentId(apartment.getId())
                     .expenseId(expense.getId())
                     .allocatedAmount(amountPerApartment)
+                    .month(dto.getDueDate() != null ? dto.getDueDate().getMonthValue() : LocalDate.now().withDayOfMonth(1).getMonthValue())
+                    .year(dto.getDueDate() != null ? dto.getDueDate().getYear() : LocalDate.now().getYear())
                     .build();
             apartmentExpenseRepository.save(ae);
         }
