@@ -22,14 +22,19 @@ public class Expense {
 
     private String description;
 
-    @Column(name = "total_amount")
+    @Column(name = "amount")
     private Double amount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private ExpenseCategory category;
 
+    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ExpenseStatus status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

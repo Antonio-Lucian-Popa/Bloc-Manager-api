@@ -94,10 +94,11 @@ CREATE TABLE meter_readings (
 CREATE TABLE expenses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     block_id UUID NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,                              -- Numele cheltuielii (ex: Apă, Salubritate)
     description TEXT,                                        -- Descriere opțională
-    total_amount NUMERIC(10,2) NOT NULL,                     -- Suma totală
-    month DATE NOT NULL,                                     -- Luna la care se referă
+    amount NUMERIC(10,2) NOT NULL,                     -- Suma totală
+    category VARCHAR(50) NOT NULL,
+    due_date DATE NOT NULL,                                     -- Luna la care se referă
+    status VARCHAR(50) NOT NULL, -- Status: "pending", "paid", "overdue"
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
