@@ -5,9 +5,12 @@ import com.asusoftware.BlocManager_api.association.repository.AssociationReposit
 import com.asusoftware.BlocManager_api.bloc.model.Bloc;
 import com.asusoftware.BlocManager_api.bloc.model.dto.CreateBlocDto;
 import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
+import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
+import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +24,16 @@ public class BlocService {
     private final BlocRepository blockRepository;
     private final AssociationRepository associationRepository;
     private final UserRoleRepository userRoleRepository;
+    private final UserService userService;
 
     /**
      * Creează un bloc nou într-o asociație (doar pentru ADMIN_ASSOCIATION).
      */
     @Transactional
-    public Bloc createBlock(UUID associationId, CreateBlocDto dto, UUID currentUserId) {
+    public Bloc createBlock(UUID associationId, CreateBlocDto dto, Jwt currentUserId) {
+        User currentUser = userService.getCurrentUserEntity(currentUserId);
         boolean isAdmin = userRoleRepository.existsByUserIdAndAssociationIdAndRole(
-                currentUserId, associationId, UsersRole.ADMIN_ASSOCIATION
+                currentUser.getId(), associationId, UsersRole.ADMIN_ASSOCIATION
         );
         if (!isAdmin) {
             throw new RuntimeException("Doar adminul asociației poate adăuga blocuri.");

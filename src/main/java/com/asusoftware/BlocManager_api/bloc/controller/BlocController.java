@@ -4,6 +4,7 @@ import com.asusoftware.BlocManager_api.bloc.model.Bloc;
 import com.asusoftware.BlocManager_api.bloc.model.dto.CreateBlocDto;
 import com.asusoftware.BlocManager_api.bloc.service.BlocService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,16 +22,15 @@ public class BlocController {
     public Bloc createBlock(
             @PathVariable UUID associationId,
             @RequestBody CreateBlocDto dto,
-            Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
-        UUID currentUserId = UUID.fromString(principal.getSubject());
-        return blocService.createBlock(associationId, dto, currentUserId);
+        return blocService.createBlock(associationId, dto, principal);
     }
 
     @GetMapping("/association/{associationId}")
     public List<Bloc> getBlocksByAssociation(
             @PathVariable UUID associationId,
-            Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
         UUID currentUserId = UUID.fromString(principal.getSubject());
         return blocService.getBlocksByAssociation(associationId, currentUserId);
