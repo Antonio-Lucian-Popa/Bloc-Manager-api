@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +82,19 @@ public class BlocService {
         }
 
         return blocksPage.map(block -> mapper.map(block, BlocDto.class));
+    }
+
+
+    public List<BlocDto> getBlocksByAssociation(UUID associationId, Jwt principal) {
+        User currentUser = userService.getCurrentUserEntity(principal);
+        boolean hasAccess = userRoleRepository.existsByUserIdAndAssociationId(currentUser.getId(), associationId);
+        if (!hasAccess) {
+            throw new RuntimeException("Nu aveți acces la această asociație.");
+        }
+
+        List<Bloc> blocks = blockRepository.findByAssociationId(associationId);
+
+        return blocks.stream().map(block -> mapper.map(block, BlocDto.class)).collect(Collectors.toList());
     }
 
 }

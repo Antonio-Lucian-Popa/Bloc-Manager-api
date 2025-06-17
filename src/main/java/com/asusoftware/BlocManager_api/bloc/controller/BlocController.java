@@ -6,6 +6,7 @@ import com.asusoftware.BlocManager_api.bloc.model.dto.CreateBlocDto;
 import com.asusoftware.BlocManager_api.bloc.service.BlocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,14 @@ public class BlocController {
             @AuthenticationPrincipal Jwt principal
     ) {
         return blocService.getBlocksByAssociation(associationId, page, size, search, principal);
+    }
+
+    @GetMapping("/associationList/{associationId}")
+    public ResponseEntity<List<BlocDto>> getBlocksByAssociation(
+            @PathVariable UUID associationId,
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        return ResponseEntity.ok(blocService.getBlocksByAssociation(associationId, principal));
     }
 
 }
