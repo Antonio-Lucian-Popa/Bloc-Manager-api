@@ -8,6 +8,7 @@ import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.model.UserRole;
 import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
+import com.asusoftware.BlocManager_api.user.model.dto.UserRoleDto;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import com.asusoftware.BlocManager_api.user.service.UserService;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.NotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -140,18 +142,27 @@ public class AssociationService {
         // Căutăm toate rolurile din acea asociație
         List<UserRole> userRoles = userRoleRepository.findByAssociationId(associationId);
 
-        // Extragem utilizatorii unici pe baza userId
-        Set<UUID> userIds = userRoles.stream()
-                .map(UserRole::getUserId)
-                .collect(Collectors.toSet());
+        // Grupăm rolurile după userId
+        Map<UUID, List<UserRole>> rolesByUserId = userRoles.stream()
+                .collect(Collectors.groupingBy(UserRole::getUserId));
 
         // Căutăm toți userii pe baza ID-urilor
-        List<User> users = userRepository.findAllById(userIds);
+        List<User> users = userRepository.findAllById(rolesByUserId.keySet());
 
         // Convertim în DTO-uri
-        return users.stream()
-                .map(user -> mapper.map(user, UserDto.class))
-                .collect(Collectors.toList());
+        return users.stream().map(user -> {
+            List<UserRole> roles = rolesByUserId.getOrDefault(user.getId(), List.of());
+
+            // Alegem primul rol (sau putem implementa o regulă de prioritate)
+            UserRoleDto selectedRoleDto = roles.stream()
+                    .findFirst()
+                    .map(role -> mapper.map(role, UserRoleDto.class))
+                    .orElse(null);
+
+            UserDto dto = mapper.map(user, UserDto.class);
+            dto.setRole(selectedRoleDto);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 }
