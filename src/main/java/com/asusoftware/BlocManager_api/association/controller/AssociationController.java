@@ -36,9 +36,15 @@ public class AssociationController {
      * Listează toate asociațiile create de userul curent.
      */
     @GetMapping("/my")
-    public List<AssociationDto> getMyAssociations(@AuthenticationPrincipal Jwt principal) {
-        return associationService.getMyAssociations(principal);
+    public Page<AssociationDto> getMyAssociations(
+            @AuthenticationPrincipal Jwt principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search
+    ) {
+        return associationService.getMyAssociations(principal, page, size, search);
     }
+
 
     /**
      * Invita un user existent într-o asociație cu un anumit rol.

@@ -17,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -113,12 +114,21 @@ public class AssociationService {
     /**
      * Returnează toate asociațiile create de utilizatorul curent.
      */
-    public List<AssociationDto> getMyAssociations(Jwt principal) {
+    public Page<AssociationDto> getMyAssociations(Jwt principal, int page, int size, String search) {
         UUID currentUserId = userService.getUserByKeycloakId(principal);
-        return associationRepository.findAllByCreatedBy(currentUserId).stream()
-                .map(association -> mapper.map(association, AssociationDto.class))
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Association> associations;
+
+        if (search != null && !search.isBlank()) {
+            associations = associationRepository.findByCreatedByAndNameContainingIgnoreCase(currentUserId, search, pageable);
+        } else {
+            associations = associationRepository.findByCreatedBy(currentUserId, pageable);
+        }
+
+        return associations.map(association -> mapper.map(association, AssociationDto.class));
     }
+
 
     /**
      * Găsește o asociație după ID.
