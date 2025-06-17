@@ -43,7 +43,7 @@ public class AssociationController {
     public void inviteUserToAssociation(
             @PathVariable UUID associationId,
             @Valid @RequestBody InviteUserDto dto,
-            @RequestAttribute Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
         associationService.inviteUserToAssociation(associationId, dto.getUserId(), dto.getRole(), principal);
     }

@@ -5,6 +5,7 @@ import com.asusoftware.BlocManager_api.apartment_expense.model.dto.CreateApartme
 import com.asusoftware.BlocManager_api.apartment_expense.service.ApartmentExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class ApartmentExpenseController {
     @PostMapping
     public ResponseEntity<ApartmentExpenseDto> createExpense(
             @RequestBody CreateApartmentExpenseDto dto,
-            @RequestAttribute("jwt") Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
         ApartmentExpenseDto result = apartmentExpenseService.createExpense(dto, principal);
         return ResponseEntity.ok(result);
@@ -36,7 +37,7 @@ public class ApartmentExpenseController {
     @GetMapping("/by-apartment/{apartmentId}")
     public ResponseEntity<List<ApartmentExpenseDto>> getByApartment(
             @PathVariable UUID apartmentId,
-            @RequestAttribute("jwt") Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
         List<ApartmentExpenseDto> result = apartmentExpenseService.getByApartment(apartmentId, principal);
         return ResponseEntity.ok(result);
@@ -54,7 +55,7 @@ public class ApartmentExpenseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(
             @PathVariable UUID id,
-            @RequestAttribute("jwt") Jwt principal
+            @AuthenticationPrincipal Jwt principal
     ) {
         apartmentExpenseService.deleteExpense(id, principal);
         return ResponseEntity.noContent().build();

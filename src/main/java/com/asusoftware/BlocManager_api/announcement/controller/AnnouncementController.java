@@ -5,6 +5,7 @@ import com.asusoftware.BlocManager_api.announcement.model.dto.CreateAnnouncement
 import com.asusoftware.BlocManager_api.announcement.service.AnnouncementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class AnnouncementController {
      */
     @PostMapping
     public AnnouncementDto createAnnouncement(@RequestBody @Valid CreateAnnouncementDto dto,
-                                              @RequestAttribute Jwt principal) {
+                                              @AuthenticationPrincipal Jwt principal) {
         return announcementService.createAnnouncement(dto, principal);
     }
 
@@ -33,7 +34,7 @@ public class AnnouncementController {
     // TODO: De pus pageable
     @GetMapping("/block/{blockId}")
     public List<AnnouncementDto> getAnnouncementsForBlock(@PathVariable UUID blockId,
-                                                          @RequestAttribute Jwt principal) {
+                                                          @AuthenticationPrincipal Jwt principal) {
         return announcementService.getAllForBlock(blockId, principal);
     }
 
@@ -42,7 +43,7 @@ public class AnnouncementController {
      */
     @DeleteMapping("/{id}")
     public void deleteAnnouncement(@PathVariable UUID id,
-                                   @RequestAttribute Jwt principal) {
+                                   @AuthenticationPrincipal Jwt principal) {
         announcementService.deleteAnnouncement(id, principal);
     }
 }
