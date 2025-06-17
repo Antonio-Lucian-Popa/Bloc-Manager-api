@@ -4,6 +4,8 @@ import com.asusoftware.BlocManager_api.apartment.model.Apartment;
 import com.asusoftware.BlocManager_api.apartment.repository.ApartmentRepository;
 import com.asusoftware.BlocManager_api.apartment_expense.model.ApartmentExpense;
 import com.asusoftware.BlocManager_api.apartment_expense.repository.ApartmentExpenseRepository;
+import com.asusoftware.BlocManager_api.bloc.model.Bloc;
+import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
 import com.asusoftware.BlocManager_api.expense.model.Expense;
 import com.asusoftware.BlocManager_api.expense.model.dto.CreateExpenseDto;
 import com.asusoftware.BlocManager_api.expense.model.dto.ExpenseDto;
@@ -11,9 +13,12 @@ import com.asusoftware.BlocManager_api.expense.repository.ExpenseRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +31,7 @@ public class ExpenseService {
     private final ApartmentRepository apartmentRepository;
     private final ApartmentExpenseRepository apartmentExpenseRepository;
     private final UserRoleRepository userRoleRepository;
+    private final BlocRepository blockRepository;
     private final ModelMapper mapper;
 
     /**
@@ -82,11 +88,26 @@ public class ExpenseService {
         return mapper.map(expense, ExpenseDto.class);
     }
 
+    public Page<ExpenseDto> getByAssociationId(UUID associationId, Pageable pageable, String search) {
+        List<Bloc> blocks = blockRepository.findAllByAssociationId(associationId);
+        List<UUID> blockIds = blocks.stream()
+                .map(Bloc::getId)
+                .collect(Collectors.toList());
+
+        if (blockIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        Page<Expense> page = expenseRepository.findByBlockIdsWithSearch(blockIds, search, pageable);
+        return page.map(expense -> mapper.map(expense, ExpenseDto.class));
+    }
+
+
+
     public void deleteExpense(UUID expenseId) {
         if (!expenseRepository.existsById(expenseId)) {
             throw new RuntimeException("Cheltuiala nu a fost găsită.");
         }
         expenseRepository.deleteById(expenseId);
     }
-
 }

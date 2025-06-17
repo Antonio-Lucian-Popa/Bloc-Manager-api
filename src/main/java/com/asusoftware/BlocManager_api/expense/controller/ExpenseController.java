@@ -5,6 +5,10 @@ import com.asusoftware.BlocManager_api.expense.model.dto.ExpenseDto;
 import com.asusoftware.BlocManager_api.expense.service.ExpenseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +44,18 @@ public class ExpenseController {
     public ExpenseDto getExpenseById(@PathVariable UUID expenseId) {
         return expenseService.getById(expenseId);
     }
+
+    @GetMapping("/by-association/{associationId}")
+    public Page<ExpenseDto> getByAssociation(
+            @PathVariable UUID associationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return expenseService.getByAssociationId(associationId, pageable, search);
+    }
+
 
     /**
      * Șterge o cheltuială după ID.
