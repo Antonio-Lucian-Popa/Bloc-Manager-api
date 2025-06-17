@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +48,7 @@ public class BlocService {
                 .associationId(associationId)
                 .name(dto.getName())
                 .address(dto.getAddress())
+                .createdAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         return blockRepository.save(block);
