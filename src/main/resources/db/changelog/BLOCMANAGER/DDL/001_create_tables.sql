@@ -42,7 +42,23 @@ CREATE TABLE apartments (
     floor INT,                                             -- Etajul
     surface NUMERIC(6,2),                                  -- Suprafața în metri pătrați
     owner_name VARCHAR(255),                               -- Nume proprietar (opțional)
+    owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =============================
+-- TABLE: apartment_users
+-- Leagă utilizatorii suplimentari de un apartament (ex: chiriași, co-proprietari)
+-- Nu înlocuiește proprietarul principal (care rămâne în apartments.owner_id)
+-- =============================
+CREATE TABLE apartment_users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),                -- ID unic pentru fiecare legătură apartament-utilizator
+    apartment_id UUID NOT NULL REFERENCES apartments(id) ON DELETE CASCADE,  -- Referință la apartamentul în care utilizatorul locuiește
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,            -- Referință la utilizatorul asociat (chiriaș, co-proprietar etc.)
+    role VARCHAR(50) DEFAULT 'TENANT' CHECK (role IN ('TENANT', 'CO_OWNER')), -- Rolul utilizatorului în apartament: chiriaș (TENANT) sau co-proprietar (CO_OWNER)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                -- Data când a fost creată asocierea
+    UNIQUE (apartment_id, user_id)                                 -- Asigură că un utilizator nu este adăugat de două ori la același apartament
 );
 
 -- =============================

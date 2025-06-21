@@ -1,12 +1,21 @@
 package com.asusoftware.BlocManager_api.apartment.service;
 
 import com.asusoftware.BlocManager_api.apartment.model.Apartment;
+import com.asusoftware.BlocManager_api.apartment.model.ApartmentUser;
+import com.asusoftware.BlocManager_api.apartment.model.dto.ApartmentDetailDto;
+import com.asusoftware.BlocManager_api.apartment.model.dto.ApartmentDto;
+import com.asusoftware.BlocManager_api.apartment.model.dto.ApartmentUserDto;
 import com.asusoftware.BlocManager_api.apartment.model.dto.CreateApartmentDto;
 import com.asusoftware.BlocManager_api.apartment.repository.ApartmentRepository;
+import com.asusoftware.BlocManager_api.apartment.repository.ApartmentUserRepository;
 import com.asusoftware.BlocManager_api.bloc.repository.BlocRepository;
+import com.asusoftware.BlocManager_api.user.model.User;
 import com.asusoftware.BlocManager_api.user.repository.UserRepository;
 import com.asusoftware.BlocManager_api.user.repository.UserRoleRepository;
+import com.asusoftware.BlocManager_api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +29,10 @@ public class ApartmentService {
     private final ApartmentRepository apartmentRepository;
     private final BlocRepository blockRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+    private final ApartmentUserRepository apartmentUserRepository;
+    private final ModelMapper mapper;
 
     /**
      * Creează un apartament într-un bloc (doar de către ADMIN_ASSOCIATION sau BLOCK_ADMIN).
@@ -54,6 +66,17 @@ public class ApartmentService {
         }
 
         return apartmentRepository.findAllByBlockId(blockId);
+    }
+
+    public ApartmentDetailDto getMyApartment(Jwt principal) {
+        User user = userService.getCurrentUserEntity(principal);
+        Apartment apartment = apartmentRepository.findByOwnerId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Apartamentul nu a fost găsit pentru utilizatorul curent."));
+        ApartmentDetailDto apartmentDetailDto = mapper.map(apartment, ApartmentDetailDto.class);
+        ApartmentUser apartmentUser = apartmentUserRepository.findByApartmentId(apartment.getId())
+                .orElseThrow(() -> new RuntimeException("Apartamentul nu are un utilizator asociat."));
+        apartmentDetailDto.setApartmentUser(mapper.map(apartmentUser, ApartmentUserDto.class));
+        return apartmentDetailDto;
     }
 }
 

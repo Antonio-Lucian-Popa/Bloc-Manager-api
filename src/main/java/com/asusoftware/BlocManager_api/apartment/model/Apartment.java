@@ -28,6 +28,9 @@ public class Apartment {
     @Column(name = "owner_name")
     private String ownerName;
 
+    @Column(name = "owner_id", nullable = false)
+    private UUID ownerId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

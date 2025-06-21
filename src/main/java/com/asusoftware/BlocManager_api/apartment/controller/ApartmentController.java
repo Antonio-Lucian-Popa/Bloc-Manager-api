@@ -1,9 +1,12 @@
 package com.asusoftware.BlocManager_api.apartment.controller;
 
 import com.asusoftware.BlocManager_api.apartment.model.Apartment;
+import com.asusoftware.BlocManager_api.apartment.model.dto.ApartmentDetailDto;
+import com.asusoftware.BlocManager_api.apartment.model.dto.ApartmentDto;
 import com.asusoftware.BlocManager_api.apartment.model.dto.CreateApartmentDto;
 import com.asusoftware.BlocManager_api.apartment.service.ApartmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +38,12 @@ public class ApartmentController {
     ) {
         UUID currentUserId = UUID.fromString(principal.getSubject());
         return apartmentService.getApartmentsInBlock(blockId, currentUserId);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApartmentDetailDto> getMyApartment(
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        return ResponseEntity.ok(apartmentService.getMyApartment(principal));
     }
 }
