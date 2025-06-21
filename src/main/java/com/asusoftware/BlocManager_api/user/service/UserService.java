@@ -46,7 +46,7 @@ public class UserService {
                 .build();
         userRepository.save(user);
 
-        if(dto.getRole() != UsersRole.LOCATAR) {
+        if(dto.getRole() != UsersRole.TENANT && dto.getRole() != UsersRole.APARTMENT_OWNER) {
             // Creează local rolul (ex: ADMIN_ASSOCIATION) – pentru început fără asociere la bloc/asociație
             UserRole role = UserRole.builder()
                     .userId(user.getId())

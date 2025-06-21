@@ -25,9 +25,6 @@ public class Apartment {
 
     private Double surface;
 
-    @Column(name = "owner_name")
-    private String ownerName;
-
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 

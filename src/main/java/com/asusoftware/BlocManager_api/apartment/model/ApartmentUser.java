@@ -1,5 +1,6 @@
 package com.asusoftware.BlocManager_api.apartment.model;
 
+import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class ApartmentUser {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private ApartmentUserRole role = ApartmentUserRole.TENANT;
+    private UsersRole role = UsersRole.TENANT;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

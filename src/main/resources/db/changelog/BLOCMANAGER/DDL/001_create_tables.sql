@@ -41,7 +41,6 @@ CREATE TABLE apartments (
     number VARCHAR(10) NOT NULL,                          -- Numărul apartamentului (ex: Ap. 7)
     floor INT,                                             -- Etajul
     surface NUMERIC(6,2),                                  -- Suprafața în metri pătrați
-    owner_name VARCHAR(255),                               -- Nume proprietar (opțional)
     owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

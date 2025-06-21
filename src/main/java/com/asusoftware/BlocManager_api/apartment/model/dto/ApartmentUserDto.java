@@ -1,6 +1,6 @@
 package com.asusoftware.BlocManager_api.apartment.model.dto;
 
-import com.asusoftware.BlocManager_api.apartment.model.ApartmentUserRole;
+import com.asusoftware.BlocManager_api.user.model.UsersRole;
 import com.asusoftware.BlocManager_api.user.model.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +17,6 @@ import java.util.UUID;
 public class ApartmentUserDto {
     private UUID apartmentId;
     private UserDto user;
-    private ApartmentUserRole role;
+    private UsersRole role;
     private LocalDateTime createdAt;
 }

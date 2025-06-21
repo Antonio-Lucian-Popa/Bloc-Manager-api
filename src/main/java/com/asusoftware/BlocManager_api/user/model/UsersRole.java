@@ -5,4 +5,5 @@ public enum UsersRole {
     BLOCK_ADMIN,        // Admin pe un singur bloc
     APARTMENT_OWNER,            // Locatar normal (proprietar)
     TENANT,            // Locatar (chiriaș)
+    CO_OWNER,          // Co-proprietar al apartamentului
 }
