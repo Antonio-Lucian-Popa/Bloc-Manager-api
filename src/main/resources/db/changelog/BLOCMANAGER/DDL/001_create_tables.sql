@@ -84,7 +84,7 @@ CREATE TABLE user_roles (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Utilizatorul
     association_id UUID REFERENCES associations(id) ON DELETE CASCADE, -- Asociația (opțional)
     block_id UUID REFERENCES blocks(id) ON DELETE CASCADE,             -- Blocul (opțional)
-    role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN_ASSOCIATION', 'BLOCK_ADMIN', 'LOCATAR')), -- Rol: ADMIN_ASSOCIATION, BLOCK_ADMIN, LOCATAR etc.
+    role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN_ASSOCIATION', 'BLOCK_ADMIN', 'APARTMENT_OWNER', 'TENANT')), -- Rol: ADMIN_ASSOCIATION, BLOCK_ADMIN, LOCATAR etc.
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, role, association_id, block_id)
 );
